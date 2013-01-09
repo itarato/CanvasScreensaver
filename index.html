@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+<head>
+
+<script type="text/javascript">
+
+var ctx;
+
+var boundaries = {
+  w: 640,
+  h: 480
+};
+
+var interval = 10;
+var speed = 10;
+
+var number = 4;
+var items = [];
+for (var i = 0; i < number; i++) {
+  items[i] = {
+    point: {
+      x: Math.random() * boundaries.w,
+      y: Math.random() * boundaries.h
+    },
+    speed: getRandomSpeedVectors(speed)
+  }
+}
+
+function onBodyLoad() {
+  var canvas = document.getElementById('screen');
+  if (!canvas.getContext) {
+    return;
+  }
+
+  ctx = canvas.getContext('2d');
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = 'rgba(33, 66, 99, 0.5)';
+
+  loop();
+}
+
+function loop() {
+  ctx.clearRect(100, 100, boundaries.w - 200, boundaries.h - 200);
+  ctx.beginPath();
+  ctx.moveTo(items[0].point.x, items[0].point.y);
+  ctx.bezierCurveTo(
+    items[1].point.x, items[1].point.y,
+    items[2].point.x, items[2].point.y,
+    items[3].point.x, items[3].point.y
+  );
+  ctx.stroke();
+
+  for (var idx in items) {
+    var item = items[idx];
+    if (!item.point) {
+      continue;
+    }
+    item.point.applyWorld(item.speed, boundaries);
+  }
+
+  setTimeout(loop, interval);
+}
+
+function getRandomSpeedVectors(speed) {
+  var speed_x = Math.random() * speed;
+  return {
+    sx: speed_x,
+    sy: Math.sqrt(Math.pow(speed, 2) - Math.pow(speed_x, 2))
+  };
+}
+
+Object.prototype.applyWorld = function(speed_vector, boundaries) {
+  if (this.x + speed_vector.sx >= boundaries.w || this.x + speed_vector.sx <= 0) {
+    speed_vector.sx *= -1;
+  }
+
+  if (this.y + speed_vector.sy >= boundaries.h || this.y + speed_vector.sy <= 0) {
+    speed_vector.sy *= -1;
+  }
+
+  this.x += speed_vector.sx;
+  this.y += speed_vector.sy;
+};
+
+</script>
+
+</head>
+<body onload="onBodyLoad();">
+
+<canvas id="screen" width="640" height="480"></canvas>
+
+</body>
+</html>
